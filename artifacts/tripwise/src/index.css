@@ -208,6 +208,24 @@ a { color: inherit; text-decoration: none; }
 .flight-price { margin-left:auto; text-align:right; }
 .flight-price strong { display:block; font-family:var(--app-font-serif); font-size:21px; font-weight:500; }
 .flight-price span { font-size:10px; color:hsl(var(--muted-foreground)); }
+.live-search { margin-top:15px; padding:18px; }
+.live-search-heading { display:flex; align-items:flex-start; justify-content:space-between; gap:14px; margin-bottom:15px; }
+.live-search-heading h3 { margin-top:5px; font-size:18px; }
+.live-chip { display:inline-flex; align-items:center; border:1px solid hsl(var(--border)); border-radius:999px; padding:6px 9px; color:hsl(var(--muted-foreground)); font:10px var(--app-font-mono); white-space:nowrap; }
+.search-fields { display:grid; grid-template-columns:repeat(6, minmax(0, 1fr)); gap:10px; align-items:end; }
+.search-fields label { display:grid; gap:6px; color:hsl(var(--muted-foreground)); font:10px var(--app-font-mono); text-transform:uppercase; letter-spacing:.08em; }
+.search-fields input { width:100%; min-width:0; border:1px solid hsl(var(--border)); border-radius:9px; background:hsl(var(--background)); color:hsl(var(--foreground)); padding:11px 10px; font:13px var(--app-font-sans); outline:none; }
+.search-fields input:focus { border-color:hsl(var(--accent)); box-shadow:0 0 0 3px hsl(var(--accent) / .12); }
+.provider-links { display:flex; gap:18px; flex-wrap:wrap; margin-top:14px; padding-top:13px; border-top:1px solid hsl(var(--border)); }
+.live-weather { display:flex; align-items:center; justify-content:space-between; gap:18px; margin-top:15px; padding:15px 18px; }
+.live-weather strong { display:block; margin-top:5px; font:26px var(--app-font-serif); font-weight:500; }
+.live-weather > div:first-child > span { display:block; margin-top:4px; color:hsl(var(--muted-foreground)); font-size:11px; }
+.weather-days { display:flex; gap:7px; flex-wrap:wrap; justify-content:flex-end; }
+.weather-days span { display:grid; gap:2px; min-width:75px; border-left:1px solid hsl(var(--border)); padding-left:9px; color:hsl(var(--muted-foreground)); font-size:10px; }
+.weather-days b { color:hsl(var(--foreground)); font:10px var(--app-font-mono); text-transform:uppercase; }
+.loading-card { margin-top:15px; color:hsl(var(--muted-foreground)); }
+.live-place-card .option-details { margin-top:15px; }
+.lodging-fields { grid-template-columns:minmax(0, 1fr) auto; }
 
 .option-card { overflow:hidden; position:relative; }
 .option-card-body { padding:17px; }
@@ -335,4 +353,15 @@ a { color: inherit; text-decoration: none; }
   .route-city strong { font-size:20px; }
   .hero-brief { min-height:365px; }
   .flight-price { margin-left:auto; }
+  .search-fields { grid-template-columns:repeat(2, minmax(0, 1fr)); }
+  .live-weather { align-items:flex-start; flex-direction:column; }
+  .weather-days { justify-content:flex-start; }
+}
+@media (max-width: 540px) {
+  .live-search { padding:14px; }
+  .live-search-heading { flex-direction:column; }
+  .search-fields, .lodging-fields { grid-template-columns:1fr; }
+  .search-fields .btn { width:100%; justify-content:center; }
+  .live-weather { padding:14px; }
+  .weather-days { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); width:100%; }
 }

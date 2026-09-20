@@ -1,0 +1,1 @@
+- [No-key travel data limits](no-key-travel-data.md) — keep query dates as strings and show explicit unavailable states beyond provider forecast windows.

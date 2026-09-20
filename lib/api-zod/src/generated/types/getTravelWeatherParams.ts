@@ -6,6 +6,11 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export interface HealthStatus {
-  status: string;
-}
+export type GetTravelWeatherParams = {
+/**
+ * @minLength 2
+ */
+city: string;
+startDate?: string;
+endDate?: string;
+};

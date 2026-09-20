@@ -10,6 +10,8 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: travel
+    description: No-key travel discovery and planning helpers
 paths:
   /healthz:
     get:
@@ -24,6 +26,144 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /travel/places:
+    get:
+      operationId: searchTravelPlaces
+      tags: [travel]
+      summary: Find hotels, motels, and places
+      description: Searches OpenStreetMap data around a city. Prices and availability are not provided by this source.
+      parameters:
+        - name: city
+          in: query
+          required: true
+          schema:
+            type: string
+            minLength: 2
+        - name: kind
+          in: query
+          required: false
+          schema:
+            type: string
+            default: lodging
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 30
+            default: 12
+      responses:
+        "200":
+          description: OpenStreetMap place results
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TravelPlacesResponse"
+        "400":
+          description: Invalid search
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "502":
+          description: Upstream travel data provider unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /travel/weather:
+    get:
+      operationId: getTravelWeather
+      tags: [travel]
+      summary: Get a destination forecast
+      description: Gets a no-key forecast from Open-Meteo for a destination and date range.
+      parameters:
+        - name: city
+          in: query
+          required: true
+          schema:
+            type: string
+            minLength: 2
+        - name: startDate
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: endDate
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Destination weather forecast
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TravelWeatherResponse"
+        "400":
+          description: Invalid search
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "502":
+          description: Upstream weather provider unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /travel/search-links:
+    get:
+      operationId: getTravelSearchLinks
+      tags: [travel]
+      summary: Build live provider search links
+      description: Creates parameterized flight and accommodation search links. These links hand the user off to providers and do not book anything.
+      parameters:
+        - name: origin
+          in: query
+          required: true
+          schema:
+            type: string
+            minLength: 2
+        - name: destination
+          in: query
+          required: true
+          schema:
+            type: string
+            minLength: 2
+        - name: departureDate
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: returnDate
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: travelers
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 12
+            default: 2
+      responses:
+        "200":
+          description: Provider search links
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TravelSearchLinksResponse"
+        "400":
+          description: Invalid search
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 components:
   schemas:
     HealthStatus:
@@ -33,4 +173,136 @@ components:
           type: string
       required:
         - status
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error
+    TravelPlace:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        category:
+          type: string
+        address:
+          type: ["string", "null"]
+        latitude:
+          type: number
+        longitude:
+          type: number
+        website:
+          type: ["string", "null"]
+        mapLink:
+          type: string
+        source:
+          type: string
+        price:
+          type: ["string", "null"]
+        availability:
+          type: string
+      required:
+        - id
+        - name
+        - category
+        - address
+        - latitude
+        - longitude
+        - website
+        - mapLink
+        - source
+        - price
+        - availability
+    TravelPlacesResponse:
+      type: object
+      properties:
+        city:
+          type: string
+        source:
+          type: string
+        retrievedAt:
+          type: string
+          format: date-time
+        places:
+          type: array
+          items:
+            $ref: "#/components/schemas/TravelPlace"
+      required:
+        - city
+        - source
+        - retrievedAt
+        - places
+    TravelWeatherDay:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        weatherCode:
+          type: integer
+        minC:
+          type: number
+        maxC:
+          type: number
+        precipitationProbability:
+          type: integer
+      required:
+        - date
+        - weatherCode
+        - minC
+        - maxC
+        - precipitationProbability
+    TravelWeatherResponse:
+      type: object
+      properties:
+        city:
+          type: string
+        source:
+          type: string
+        retrievedAt:
+          type: string
+          format: date-time
+        latitude:
+          type: number
+        longitude:
+          type: number
+        days:
+          type: array
+          items:
+            $ref: "#/components/schemas/TravelWeatherDay"
+        note:
+          type: ["string", "null"]
+      required:
+        - city
+        - source
+        - retrievedAt
+        - latitude
+        - longitude
+        - days
+    TravelSearchLinksResponse:
+      type: object
+      properties:
+        origin:
+          type: string
+        destination:
+          type: string
+        flightSearchUrl:
+          type: string
+        accommodationSearchUrl:
+          type: string
+        source:
+          type: string
+        note:
+          type: string
+      required:
+        - origin
+        - destination
+        - flightSearchUrl
+        - accommodationSearchUrl
+        - source
+        - note
 
