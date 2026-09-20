@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "Tripwise Travel Planner"
+description = "A calm, premium travel planning workspace that helps travelers shape a complete trip from departure and budget through flights, stays, activities, transport, itinerary, and booking-ready next steps."
+version = "1.0.0"
+id = "artifacts/tripwise"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 22649
+
+[services.development]
+run = "pnpm --filter @workspace/tripwise run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/tripwise", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/tripwise/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "22649"
+BASE_PATH = "/"

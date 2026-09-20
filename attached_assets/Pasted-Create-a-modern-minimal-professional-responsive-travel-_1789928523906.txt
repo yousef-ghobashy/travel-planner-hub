@@ -1,0 +1,1105 @@
+Create a modern, minimal, professional, responsive travel planning and booking web application that allows users to search, compare, plan, and book their entire trip from one platform.
+
+## 1. Core Concept
+
+Build an all-in-one travel platform where the user enters:
+
+* Departure country
+* Departure city or airport
+* Destination country
+* Destination city
+* Departure date
+* Return date
+* Number of travelers
+* Adults
+* Children
+* Total trip budget
+* Preferred currency
+* Travel style: Budget / Standard / Luxury
+
+The platform should then generate a personalized travel plan including:
+
+* Flights
+* Destination city
+* Hotels / Motels / Apartments
+* Tourist attractions
+* Transportation
+* Daily itinerary
+* Total estimated cost
+* Booking options
+
+The user should be able to complete bookings through the website whenever the connected provider/API supports direct booking.
+
+---
+
+# 2. Visual Design — Minimal Modern Travel UI
+
+The entire application must follow a **minimal, modern, calm, premium travel-tech aesthetic**.
+
+## Design principles
+
+* Minimalistic interface
+* Clean layouts
+* Plenty of whitespace
+* Soft rounded cards
+* Subtle shadows
+* Simple navigation
+* Clear visual hierarchy
+* Large high-quality travel photography
+* Elegant typography
+* Smooth micro-interactions
+* No unnecessary decorative elements
+* No excessive gradients
+* No visually aggressive colors
+* No cluttered dashboards
+
+## Color palette
+
+Use calm, sophisticated colors such as:
+
+* Off-white / warm white backgrounds
+* Very light gray surfaces
+* Soft beige
+* Muted blue
+* Dusty blue
+* Soft sage green
+* Charcoal / dark gray text
+* One subtle accent color for primary actions
+
+Avoid:
+
+* Neon colors
+* Extremely saturated colors
+* Excessive black
+* Excessive gradients
+* Too many colors on the same screen
+
+The UI should feel similar to a premium modern travel application rather than a generic booking website.
+
+Support:
+
+* Light mode
+* Dark mode
+
+Dark mode should remain calm and elegant rather than using pure black backgrounds.
+
+---
+
+# 3. Homepage
+
+Create a clean hero section with the main message:
+
+"Plan Your Perfect Trip"
+
+Subtitle:
+
+"Find flights, hotels, attractions and transportation — then book everything in one place."
+
+The main search card should contain:
+
+From
+To
+Departure Date
+Return Date
+Travelers
+Budget
+
+Primary CTA:
+
+"Plan My Trip"
+
+Secondary action:
+
+"Explore Destinations"
+
+Below the hero:
+
+* Popular destinations
+* Flight deals
+* Recommended hotels
+* Popular attractions
+* Travel inspiration
+
+Keep the homepage visually clean and avoid excessive sections.
+
+---
+
+# 4. Flight Search and Comparison
+
+Create a complete flight search engine interface.
+
+Display:
+
+* Airline
+* Airline logo
+* Departure airport
+* Arrival airport
+* Departure time
+* Arrival time
+* Flight duration
+* Stops
+* Baggage allowance
+* Ticket price
+* Currency
+* Refundability
+* Seat information
+* Fare conditions
+* Booking availability
+
+Automatically categorize results into:
+
+### Cheapest
+
+The lowest available ticket price.
+
+### Best Value
+
+The best balance of:
+
+* Price
+* Duration
+* Stops
+* Schedule
+* Baggage
+* Airline information
+
+### Premium / Most Expensive
+
+The highest-priced available option.
+
+Filters:
+
+* Price
+* Airline
+* Stops
+* Departure time
+* Arrival time
+* Baggage
+* Refundability
+* Flight duration
+
+Sorting:
+
+* Cheapest
+* Best value
+* Fastest
+* Premium
+
+Each flight card must have a clear:
+
+"Book Now"
+
+button.
+
+---
+
+# 5. Flight Booking
+
+The website should support an integrated flight booking workflow.
+
+Booking flow:
+
+Search Flight
+→ Select Flight
+→ Passenger Details
+→ Seat Selection
+→ Baggage
+→ Optional Add-ons
+→ Price Summary
+→ Payment
+→ Booking Confirmation
+
+Passenger information:
+
+* Full name
+* Date of birth
+* Gender where required
+* Passport information
+* Nationality
+* Contact information
+
+Allow users to review all details before payment.
+
+After successful booking generate:
+
+* Booking reference / PNR
+* Digital booking confirmation
+* Passenger details
+* Flight details
+* Payment summary
+
+Allow users to access bookings later from:
+
+"My Trips"
+
+Important:
+
+Use legitimate flight-booking APIs, airline APIs, GDS providers, or authorized booking/affiliate providers.
+
+Do not simulate real payment or real booking when production APIs are not connected.
+
+---
+
+# 6. Destination City Selection
+
+After selecting the destination country, allow the user to choose the city.
+
+For each city display:
+
+* City name
+* Country
+* Short description
+* Average hotel price
+* Estimated daily expenses
+* Popular attractions
+* Transportation system
+* Best travel period
+* General travel style
+
+Allow comparison between cities.
+
+---
+
+# 7. Hotel / Motel / Apartment Search
+
+Create a complete accommodation search and booking experience.
+
+Accommodation categories:
+
+* Hostel
+* Motel
+* Hotel
+* Apartment
+* Resort
+* Luxury Hotel
+
+Allow users to define:
+
+* Price per night
+* Total accommodation budget
+* Number of rooms
+* Guests
+* Property type
+* Minimum rating
+* Amenities
+* Distance from city center
+
+Classify results into:
+
+### Budget
+
+Affordable properties within the user's budget.
+
+### Best Value
+
+Best balance between:
+
+* Price
+* Rating
+* Location
+* Amenities
+* Reviews
+
+### Premium
+
+Higher-end properties with premium facilities.
+
+Each property card should display:
+
+* Large image
+* Property name
+* Rating
+* Reviews
+* Price per night
+* Total stay price
+* Taxes and fees
+* Distance from city center
+* Amenities
+* Room type
+* Breakfast
+* Cancellation policy
+* Map location
+
+Buttons:
+
+"View Rooms"
+"Book Now"
+"Save"
+
+---
+
+# 8. Hotel Booking
+
+Support booking accommodation directly through the platform when the provider supports it.
+
+Booking workflow:
+
+Select Hotel
+→ Select Room
+→ Guest Information
+→ Add-ons
+→ Review Reservation
+→ Payment
+→ Confirmation
+
+Allow:
+
+* Room selection
+* Multiple rooms
+* Guest details
+* Special requests
+* Breakfast selection
+* Cancellation protection where available
+* Payment
+* Booking confirmation
+
+Display the complete price before payment:
+
+Room price
++
+Taxes
++
+Service fees
++
+Additional charges
+==================
+
+Final price
+
+After booking:
+
+* Booking number
+* Hotel address
+* Check-in / check-out
+* Room information
+* Guest information
+* Payment status
+* Cancellation policy
+
+---
+
+# 9. Attractions and Activities
+
+For the destination city, display important attractions and activities.
+
+Categories:
+
+* Historical
+* Museums
+* Nature
+* Beaches
+* Shopping
+* Restaurants
+* Entertainment
+* Family
+* Nightlife
+* Cultural
+* Religious landmarks
+
+Each attraction should show:
+
+* Image
+* Name
+* Description
+* Rating
+* Entry fee
+* Opening hours
+* Estimated visit duration
+* Location
+* Distance from hotel
+* Recommended visit time
+
+Sections:
+
+### Must Visit
+
+### Hidden Gems
+
+### Free Attractions
+
+### Family Friendly
+
+### Popular Activities
+
+---
+
+# 10. Activity Booking
+
+Allow users to book activities and attractions directly from the platform where supported.
+
+Booking flow:
+
+Select Activity
+→ Select Date
+→ Select Time
+→ Number of Visitors
+→ Add-ons
+→ Payment
+→ Confirmation
+
+Examples:
+
+* Museum tickets
+* Tours
+* Boat trips
+* Theme parks
+* Guided tours
+* Historical site tickets
+* Experiences
+
+Provide:
+
+"Book Activity"
+
+button on eligible attractions.
+
+---
+
+# 11. Transportation
+
+Create a transportation planning and booking module.
+
+Transportation types:
+
+* Airport transfer
+* Metro
+* Bus
+* Train
+* Taxi
+* Ride-sharing
+* Car rental
+* Private driver
+* Walking
+
+For each option show:
+
+* Estimated price
+* Travel time
+* Availability
+* Operating hours
+* Pros / cons
+* How to use it
+
+---
+
+# 12. Transportation Booking
+
+Allow direct booking when supported.
+
+Support:
+
+### Airport Transfer
+
+Airport
+→ Hotel
+
+User selects:
+
+* Vehicle type
+* Pickup time
+* Number of passengers
+* Number of bags
+* Pickup location
+
+### Car Rental
+
+Allow:
+
+* Car category
+* Pickup location
+* Drop-off location
+* Pickup date
+* Return date
+* Insurance options
+* Add-ons
+
+### Train / Bus Tickets
+
+Allow users to:
+
+* Search
+* Compare
+* Select seat
+* Enter passenger details
+* Pay
+* Receive confirmation
+
+---
+
+# 13. Complete Trip Budget
+
+Automatically calculate:
+
+Flight
++
+Hotel
++
+Transportation
++
+Food
++
+Activities
++
+Other expenses
+
+Display:
+
+### Minimum Budget
+
+### Recommended Budget
+
+### Premium Budget
+
+Allow the user to modify the budget and instantly update recommendations.
+
+Use clear visual breakdowns such as simple progress bars, cards, or lightweight charts.
+
+---
+
+# 14. AI Travel Recommendation Engine
+
+Build an intelligent recommendation engine that analyzes:
+
+* Budget
+* Travel dates
+* Departure location
+* Destination
+* Travelers
+* Travel style
+* Hotel preferences
+* Activity preferences
+* Transportation preferences
+
+Generate personalized recommendations for:
+
+* Flight
+* Hotel
+* Activities
+* Transportation
+* Itinerary
+* Total budget
+
+For each recommendation explain the reason.
+
+Example:
+
+"This hotel fits your nightly budget, has a strong guest rating, and is close to the attractions in your itinerary."
+
+Do not fabricate real-time prices, availability, ratings, booking data, or reviews.
+
+---
+
+# 15. Personalized Itinerary
+
+Generate a complete daily itinerary.
+
+Example:
+
+## Day 1
+
+09:00 — Breakfast
+10:00 — Eiffel Tower
+13:00 — Lunch
+15:00 — Louvre Museum
+18:00 — City Center
+20:00 — Dinner
+
+Optimize the itinerary according to geographic location.
+
+Avoid sending the user back and forth unnecessarily across the city.
+
+Consider:
+
+* Opening hours
+* Travel time
+* Distance
+* User budget
+* Attraction duration
+* Transportation availability
+
+Every itinerary item should have:
+
+* Time
+* Location
+* Estimated duration
+* Estimated cost
+* Transportation method
+* Booking option when available
+
+---
+
+# 16. Complete Trip Booking
+
+The most important concept of the platform is:
+
+## "Book Your Entire Trip"
+
+The user should be able to assemble the entire trip and book everything from one interface.
+
+Example:
+
+Flight
+$420
+
+Hotel
+$570
+
+Airport Transfer
+$35
+
+Attractions
+$150
+
+Transportation
+$100
+
+Total
+$1,275
+
+Primary CTA:
+
+"Book Entire Trip"
+
+The system should then guide the user through all required booking steps and payments.
+
+The booking process can be:
+
+Flight
+→ Hotel
+→ Activities
+→ Transportation
+→ Final Review
+→ Payment
+→ Confirmation
+
+Alternatively, allow individual bookings separately.
+
+---
+
+# 17. Unified Checkout
+
+Create a clean unified checkout experience.
+
+Display:
+
+### Trip Summary
+
+Flight
+Hotel
+Activities
+Transportation
+
+### Price Breakdown
+
+Subtotal
+Taxes
+Service fees
+Discounts
+Total
+
+Allow:
+
+* Promo codes
+* Currency selection
+* Payment method
+* Billing information
+
+Payment methods can include:
+
+* Credit Card
+* Debit Card
+* Apple Pay where supported
+* Google Pay where supported
+* Other payment gateways supported by the backend
+
+Use a secure external payment gateway such as Stripe or another legitimate payment provider.
+
+Never store raw card numbers in the application database.
+
+---
+
+# 18. Booking Confirmation
+
+After successful booking create a unified confirmation page.
+
+Display:
+
+## Your Trip Is Confirmed
+
+Include:
+
+* Flight confirmation
+* Hotel confirmation
+* Transportation confirmation
+* Activity confirmation
+* Total payment
+* Booking references
+
+Provide actions:
+
+"View My Trip"
+"Download Confirmation"
+"Export PDF"
+"Add to Calendar"
+"Share Trip"
+
+---
+
+# 19. My Trips Dashboard
+
+Create a clean dashboard called:
+
+"My Trips"
+
+Each trip should display:
+
+* Destination
+* Travel dates
+* Travelers
+* Total cost
+* Booking status
+* Flight
+* Hotel
+* Transportation
+* Activities
+
+Users can:
+
+* View trip
+* Modify trip
+* Cancel eligible bookings
+* Download confirmations
+* View itinerary
+* View maps
+* Add bookings
+* Save favorite hotels and flights
+
+---
+
+# 20. Interactive Map
+
+Integrate an interactive map using:
+
+* Google Maps
+* Mapbox
+* OpenStreetMap
+
+Display:
+
+* Departure airport
+* Arrival airport
+* Hotel
+* Attractions
+* Restaurants
+* Transportation stations
+* Rental locations
+
+Allow users to see:
+
+* Distance
+* Travel time
+* Route
+* Nearby places
+
+---
+
+# 21. Travel Search Results UX
+
+Search results should remain minimal and easy to scan.
+
+Use:
+
+* Large cards
+* Compact information
+* Clear prices
+* Strong primary CTA
+* Simple filters
+* Sticky filter/search controls
+* Responsive mobile layout
+
+Avoid overly dense tables.
+
+---
+
+# 22. Authentication
+
+Implement user authentication using:
+
+ASP.NET Core Identity
+
+Support:
+
+* Email registration
+* Login
+* Logout
+* Forgot password
+* Password reset
+* Google Sign-In
+
+Users should be able to manage:
+
+* Profile
+* Passport/traveler information
+* Saved payment preferences where securely supported
+* Saved trips
+* Booking history
+
+Do not store sensitive payment card data directly.
+
+---
+
+# 23. Technical Stack
+
+Frontend:
+
+* HTML5
+* CSS3
+* Bootstrap 5
+* Vanilla JavaScript
+
+Do not use:
+
+* React
+* Angular
+* Vue
+
+Backend:
+
+* ASP.NET Core Web API
+
+Database:
+
+* SQL Server
+
+AI / Recommendation Engine:
+
+* Python
+* Optional machine-learning recommendation model
+* REST API or ONNX Runtime integration where required
+
+---
+
+# 24. External APIs
+
+Structure the system to support real external APIs.
+
+Flights:
+
+* Amadeus
+* Duffel
+* Sabre
+* Travelport
+* Authorized airline/GDS provider
+
+Hotels:
+
+* Amadeus Hotels
+* Booking/authorized accommodation API
+* Expedia/affiliate APIs
+* Other legitimate accommodation providers
+
+Activities:
+
+* Viator
+* GetYourGuide
+* Tiqets
+* Other legitimate activity providers
+
+Maps:
+
+* Google Maps
+* Mapbox
+* OpenStreetMap
+
+Payments:
+
+* Stripe
+* Paymob
+* Other legitimate payment provider
+
+Currency:
+
+* Exchange-rate API
+
+Weather:
+
+* Weather API
+
+Transportation:
+
+* Public transit APIs
+* Train APIs
+* Bus APIs
+* Car rental APIs
+* Transfer providers
+
+The architecture must use an abstraction layer so providers can be replaced without rewriting the frontend or core business logic.
+
+---
+
+# 25. Database Structure
+
+Create a properly normalized relational database.
+
+Suggested entities:
+
+Users
+TravelerProfiles
+Trips
+Destinations
+Cities
+Countries
+Airports
+Airlines
+Flights
+FlightFares
+Hotels
+HotelRooms
+HotelBookings
+FlightBookings
+Attractions
+ActivityBookings
+TransportationOptions
+TransportationBookings
+CarRentals
+Itineraries
+ItineraryItems
+Budgets
+Payments
+PaymentTransactions
+BookingReferences
+SavedFlights
+SavedHotels
+SavedAttractions
+Reviews
+Notifications
+
+Create:
+
+* Primary keys
+* Foreign keys
+* Indexes
+* Appropriate constraints
+* Audit fields
+* Booking status fields
+
+---
+
+# 26. API Architecture
+
+Create clean REST APIs.
+
+Examples:
+
+GET /api/flights/search
+GET /api/flights/{id}
+
+POST /api/flights/{id}/book
+
+GET /api/hotels/search
+GET /api/hotels/{id}
+POST /api/hotels/{id}/book
+
+GET /api/activities
+GET /api/activities/{id}
+POST /api/activities/{id}/book
+
+GET /api/transportation
+POST /api/transportation/book
+
+POST /api/trips
+GET /api/trips/{id}
+PUT /api/trips/{id}
+DELETE /api/trips/{id}
+
+POST /api/trips/{id}/itinerary
+
+POST /api/recommendations
+
+POST /api/budget/calculate
+
+POST /api/payments/create
+POST /api/payments/confirm
+
+GET /api/bookings
+GET /api/bookings/{id}
+
+---
+
+# 27. Data Accuracy and Booking Safety
+
+The application must clearly distinguish between:
+
+* Real-time API data
+* Cached data
+* Estimated prices
+* Demo data
+
+Never present fabricated booking availability as real.
+
+Every real-time flight/hotel/activity result should display the retrieval time where appropriate.
+
+When an external API is unavailable:
+
+* Display a clear error
+* Use cached results when available
+* Otherwise display clearly labeled demo data
+
+Never allow a demo booking to appear as a real confirmed booking.
+
+---
+
+# 28. Responsive Design
+
+The website must work perfectly on:
+
+* Desktop
+* Laptop
+* Tablet
+* Mobile
+
+Mobile experience should remain minimal and easy to use.
+
+Use:
+
+* Bottom navigation where useful
+* Sticky booking CTA
+* Collapsible filters
+* Compact cards
+* Touch-friendly controls
+
+---
+
+# 29. Final User Experience
+
+The complete user journey should feel like a single intelligent travel assistant.
+
+The user starts with:
+
+"I want to travel."
+
+The system takes them through:
+
+Departure
+→ Destination
+→ Dates
+→ Travelers
+→ Budget
+→ Flights
+→ City
+→ Hotel
+→ Attractions
+→ Transportation
+→ Itinerary
+→ Total Cost
+→ Booking
+→ Payment
+→ Confirmation
+
+The result should be:
+
+## "Everything for your trip, in one place."
+
+The interface must remain minimal, calm, elegant and easy to understand throughout the entire journey.
+
+Build the application first with realistic demo data, but architect every module so it can later connect to real flight, hotel, activity, transportation and payment providers without major frontend restructuring.
