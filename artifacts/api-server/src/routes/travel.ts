@@ -19,7 +19,7 @@ const OVERPASS_URL = "https://overpass-api.de/api/interpreter";
 const OPEN_METEO_URL = "https://api.open-meteo.com/v1/forecast";
 const OUR_AIRPORTS_URL = "https://ourairports.com/data/airports.csv";
 const EXCHANGE_RATE_URL = "https://open.er-api.com/v6/latest";
-const USER_AGENT = "Tripwise/1.0 (free travel discovery)";
+const USER_AGENT = "TraveL&/1.0 (free travel discovery)";
 const commonCountryNames: Record<string, string> = {
   EG: "Egypt",
   ES: "Spain",
@@ -164,6 +164,19 @@ function overpassFilter(kind: string): string {
       return `nwr["tourism"~"attraction|museum|gallery|viewpoint|theme_park|zoo"]`;
     case "restaurant":
       return `nwr["amenity"~"restaurant|cafe|bar|fast_food"]`;
+    case "hotel":
+      return `nwr["tourism"="hotel"]`;
+    case "motel":
+      return `nwr["tourism"="motel"]`;
+    case "hostel":
+      return `nwr["tourism"="hostel"]`;
+    case "apartment":
+      return `nwr["tourism"="apartment"]`;
+    case "guest_house":
+    case "guesthouse":
+      return `nwr["tourism"="guest_house"]`;
+    case "resort":
+      return `nwr["tourism"~"hotel|resort"]["stars"~"4|5"]`;
     case "lodging":
     default:
       return `nwr["tourism"~"hotel|motel|hostel|guest_house|apartment"]`;

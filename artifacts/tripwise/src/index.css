@@ -1,6 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,600&display=swap');
 @import 'tailwindcss';
 @import 'tw-animate-css';
+@import 'leaflet/dist/leaflet.css';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -331,7 +332,7 @@ a { color: inherit; text-decoration: none; }
 .empty-state p { color:hsl(var(--muted-foreground)); font-size:12px; max-width:300px; margin:0 auto 16px; line-height:1.5; }
 .notice { display:flex; align-items:flex-start; gap:10px; padding:12px 14px; border-radius:9px; background:hsl(var(--accent) / .15); color:hsl(var(--accent-foreground)); font-size:11px; line-height:1.45; }
 .notice svg { flex:none; width:15px; margin-top:1px; }
-.dark .notice { background:hsl(168 36% 24% / .94); border:1px solid hsl(42 65% 72% / .42); color:hsl(42 42% 95%); }
+.dark .notice { background:hsl(168 36% 24% / .96); border:1px solid hsl(42 65% 72% / .58); color:hsl(42 42% 97%); }
 .dark .notice svg { color:hsl(14 74% 73%); }
 .loading-skeleton { height:80px; border-radius:11px; background:linear-gradient(90deg, hsl(var(--muted)), hsl(var(--card)), hsl(var(--muted))); background-size:200% 100%; animation:skeleton 1.7s infinite; }
 @keyframes skeleton { to { background-position:-200% 0; } }
@@ -391,3 +392,33 @@ a { color: inherit; text-decoration: none; }
   .budget-controls { grid-template-columns:1fr; }
   .planner-card { padding:14px; }
 }
+.map-panel .leaflet-container { width:100%; height:100%; min-height:360px; border-radius:15px; background:hsl(175 19% 29%); z-index:1; }
+.map-panel .leaflet-tile-pane { filter:saturate(.6) brightness(.7) hue-rotate(150deg); }
+.dark .map-panel .leaflet-tile-pane { filter:saturate(.4) brightness(.4) hue-rotate(150deg); }
+.map-panel .leaflet-control-zoom { border:1px solid hsl(var(--border)); border-radius:8px; overflow:hidden; }
+.map-panel .leaflet-control-zoom a { background:hsl(var(--card)); color:hsl(var(--foreground)); border-color:hsl(var(--border)); width:28px; height:28px; line-height:28px; font-size:13px; }
+.map-panel .leaflet-control-zoom a:hover { background:hsl(var(--muted)); }
+.map-panel .leaflet-popup-content-wrapper { background:hsl(var(--card)); color:hsl(var(--foreground)); border-radius:9px; box-shadow:0 6px 18px hsl(176 30% 8% / .2); border:1px solid hsl(var(--border)); }
+.map-panel .leaflet-popup-tip { background:hsl(var(--card)); }
+.map-panel .leaflet-popup-content { margin:10px 12px; font:12px var(--app-font-sans); }
+.map-panel .leaflet-popup-content strong { display:block; font-size:13px; margin-bottom:3px; }
+.map-panel .leaflet-popup-content span { color:hsl(var(--muted-foreground)); font-size:10px; }
+.map-custom-marker { width:22px; height:22px; border:3px solid hsl(40 35% 94%); background:hsl(var(--accent)); border-radius:50% 50% 50% 0; transform:rotate(-45deg); box-shadow:0 3px 9px hsl(176 30% 8% / .28); }
+.map-custom-marker.stay-marker { background:hsl(var(--primary)); }
+.map-custom-marker.activity-marker { background:hsl(204 34% 61%); }
+.map-custom-marker.airport-marker { background:hsl(101 28% 52%); }
+.budget-editable { display:flex; align-items:center; gap:6px; }
+.budget-editable input { width:90px; border:1px solid hsl(var(--border)); border-radius:7px; background:hsl(var(--background)); color:hsl(var(--foreground)); padding:6px 8px; font:12px var(--app-font-mono); outline:none; text-align:right; }
+.budget-editable input:focus { border-color:hsl(var(--accent)); box-shadow:0 0 0 2px hsl(var(--accent) / .12); }
+.budget-over { color:hsl(var(--destructive)); }
+.budget-over .bar-track span { background:hsl(var(--destructive)); }
+.trip-create-form { display:grid; gap:12px; padding:18px; }
+.trip-create-form label { display:grid; gap:5px; color:hsl(var(--muted-foreground)); font:10px var(--app-font-mono); text-transform:uppercase; letter-spacing:.08em; }
+.trip-create-form input, .trip-create-form select { width:100%; border:1px solid hsl(var(--border)); border-radius:9px; background:hsl(var(--background)); color:hsl(var(--foreground)); padding:10px; font:13px var(--app-font-sans); outline:none; }
+.trip-create-form input:focus, .trip-create-form select:focus { border-color:hsl(var(--accent)); box-shadow:0 0 0 3px hsl(var(--accent) / .12); }
+.trip-create-fields { display:grid; grid-template-columns:repeat(2, 1fr); gap:10px; }
+@media (max-width: 540px) { .trip-create-fields { grid-template-columns:1fr; } }
+.trip-actions { display:flex; gap:5px; }
+.trip-actions button { padding:6px 7px; border:0; background:transparent; color:hsl(var(--muted-foreground)); border-radius:6px; cursor:pointer; }
+.trip-actions button:hover { background:hsl(var(--muted)); color:hsl(var(--foreground)); }
+.trip-actions svg { width:13px; height:13px; }
