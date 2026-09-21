@@ -614,19 +614,49 @@ function Home() {
   const totalPlanned = current.budgetAllocation.flights + current.budgetAllocation.accommodation + current.budgetAllocation.transportation + current.budgetAllocation.food + current.budgetAllocation.activities + current.budgetAllocation.other;
   const progress = tripProgress(current);
 
-  const handleBudgetChange = (b: BudgetSettings) => {
-    const remaining = b.amount - current.budgetAllocation.flights - current.budgetAllocation.accommodation;
-    const auto = autoAllocateRemaining(remaining);
-    updateTrip(current.id, { budget: b, budgetAllocation: { ...current.budgetAllocation, ...auto } });
-  };
+  const [day, setDay] = useState(1);
+
+  const itinerary = useMemo(() => {
+    if (current.itinerary.length > 0) return current.itinerary;
+    return generateItinerary(current);
+  }, [current]);
+
+  const markers: MapMarker[] = useMemo(() => {
+    const m: MapMarker[] = [];
+    if (selectedStay) m.push({ lat: selectedStay.lat, lon: selectedStay.lon, label: selectedStay.name, type: 'stay' });
+    const currentDay = itinerary.find(d => d.n === day);
+    if (currentDay) {
+      for (const item of currentDay.items) {
+        if (item.lat && item.lon) m.push({ lat: item.lat, lon: item.lon, label: item.name, type: item.name.includes('airport') || item.name.includes('Arrive') || item.name.includes('Head to') ? 'airport' : 'activity' });
+      }
+    }
+    return m;
+  }, [selectedStay, itinerary, day]);
+
+  const route: Array<[number, number]> = useMemo(() => {
+    const currentDay = itinerary.find(d => d.n === day);
+    if (!currentDay) return [];
+    const points: Array<[number, number]> = [];
+    if (selectedStay) points.push([selectedStay.lat, selectedStay.lon]);
+    for (const item of currentDay.items) {
+      if (item.lat && item.lon) points.push([item.lat, item.lon]);
+    }
+    if (selectedStay && points.length > 1) points.push([selectedStay.lat, selectedStay.lon]);
+    return points;
+  }, [itinerary, day, selectedStay]);
 
   return <div className="page">
-    <PageHeading eyebrow={`Good morning, Maya`} title="A little room to wander." description={`Your ${current.destination} plan is taking shape. We\u2019ve kept the essentials close and left space for the parts you can\u2019t schedule.`} actions={<><button className="btn btn-quiet" onClick={() => setLocation('/trips')} data-testid="button-view-trips">View my trips <ArrowRight /></button><button className="btn btn-primary" onClick={() => setLocation('/itinerary')} data-testid="button-open-itinerary">Open itinerary <CalendarDays /></button></>} />
-    <div className="card planner-card"><div><div className="eyebrow">Planning preference</div><h2>Set the shape of this trip</h2><p>Recommendations will use this budget as you adjust it.</p></div><BudgetControls budget={current.budget} setBudget={handleBudgetChange} /><Link href="/budget" className="text-link">See the full breakdown <ArrowRight size={13} /></Link></div>
-    <div className="brief-layout"><div className="hero-brief"><div className="hero-content"><div className="eyebrow">Trip brief \u00b7 {String(nights).padStart(2, '0')} days \u00b7 {new Date(current.startDate + 'T12:00:00').toLocaleDateString(undefined, { month: 'long' }).split(' ')[0]}</div><h1>{current.destination}<br /><em>in full.</em></h1><p>Your trip, gathered in one calm place.</p><div className="hero-pills"><span className="hero-pill">{formatDateRange(current.startDate, current.endDate)}</span><span className="hero-pill">{current.travelers} traveler{current.travelers > 1 ? 's' : ''}</span><span className="hero-pill">Slow &amp; curious</span></div></div></div><div className="brief-side"><div className="card stat-card"><div className="stat-icon"><CircleDollarSign /></div><div><div className="stat-value">{formatMoney(totalPlanned, current.budget.currency)}</div><div className="stat-note">estimated total \u00b7 for {current.travelers} traveler{current.travelers > 1 ? 's' : ''}</div></div></div><div className="card stat-card"><div className="stat-icon"><CloudSun /></div><div><div className="stat-value">20\u00b0</div><div className="stat-note">typical daytime high \u00b7 {current.destination}</div></div></div><div className="card next-card card-pad"><div className="next-date"><strong>{new Date(current.startDate + 'T12:00:00').getDate()}</strong><span>{new Date(current.startDate + 'T12:00:00').toLocaleDateString(undefined, { month: 'short' })}</span></div><div><h3>Next up: fly to {current.destination}</h3><p>{selectedFlight ? `${selectedFlight.airline} \u00b7 ${current.originCode} \u2192 ${current.destinationCode} \u00b7 ${selectedFlight.stops} \u00b7 ${selectedFlight.duration}` : 'Select a flight'}</p></div><ChevronRight size={17} className="muted" /></div></div></div>
-    <div className="section-label"><h2>Plan at a glance</h2><Link href="/itinerary">See full plan <ArrowRight size={13} style={{ verticalAlign: 'middle' }} /></Link></div>
-    <div className="grid grid-3"><Link href="/flights" className="card route-card" data-testid="card-glance-flights"><div className="route-city"><span>Departure</span><strong>{current.originCode}</strong><span>{new Date(current.startDate + 'T12:00:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}{selectedFlight ? ` \u00b7 ${selectedFlight.airline}` : ''}</span></div><div className="route-line" /><div className="route-city" style={{ textAlign: 'right' }}><span>Arrival</span><strong>{current.destinationCode}</strong><span>{selectedFlight?.out ?? '\u2014'}</span></div></Link><Link href="/stays" className="card next-card card-pad" data-testid="card-glance-stay"><div className="stat-icon"><BedDouble /></div><div><h3>{selectedStay?.name ?? 'Choose a stay'}</h3><p>{selectedStay ? `${selectedStay.area.split(' \u00b7 ')[0]} \u00b7 ${nights} nights` : `${nights} nights \u00b7 select accommodation`}</p></div><ChevronRight size={17} className="muted" /></Link><Link href="/explore" className="card next-card card-pad" data-testid="card-glance-picks"><div className="stat-icon"><Sparkles /></div><div><h3>{current.savedActivities.length} thing{current.savedActivities.length !== 1 ? 's' : ''} you saved</h3><p>{current.savedActivities.length > 0 ? activities.filter(a => current.savedActivities.includes(a.id)).map(a => a.name).slice(0, 2).join(', ') + (current.savedActivities.length > 2 ? ' & more' : '') : 'Save activities to build your plan'}</p></div><ChevronRight size={17} className="muted" /></Link></div>
-    <div className="section-label"><h2>Before you go</h2><span className="eyebrow">{[current.selectedFlight, current.selectedStay].filter(Boolean).length + (current.savedActivities.length > 0 ? 1 : 0)} of 5 complete</span></div><div className="card card-pad"><div className="grid grid-3"><div className="next-card"><div className="stat-icon">{current.selectedFlight ? <Check /> : <Plane />}</div><div><h3>Choose a flight</h3><p className="muted">{selectedFlight ? `${selectedFlight.airline} is your current pick.` : 'Find the right route.'}</p></div></div><div className="next-card"><div className="stat-icon"><Plane /></div><div><h3>Check entry details</h3><p className="muted">Verify passport and visa requirements.</p></div></div><div className="next-card"><div className="stat-icon"><Backpack /></div><div><h3>Start packing</h3><p className="muted">Mild days, cool evenings.</p></div></div></div></div>
+    <PageHeading eyebrow={`Trip Dashboard`} title={current.destination} description={`${formatDateRange(current.startDate, current.endDate)} \u00b7 ${nights} days \u00b7 ${current.travelers} travelers`} actions={<><button className="btn btn-quiet" onClick={() => setLocation('/trips')} data-testid="button-view-trips">View all trips <ArrowRight /></button></>} />
+    
+    <div className="grid grid-3" style={{ marginBottom: '24px' }}>
+      <div className="card stat-card"><div className="stat-icon"><CircleDollarSign /></div><div><div className="stat-value">{formatMoney(totalPlanned, current.budget.currency)}</div><div className="stat-note">budget allocated</div></div></div>
+      <div className="card stat-card"><div className="stat-icon"><CloudSun /></div><div><div className="stat-value">20\u00b0</div><div className="stat-note">typical daytime high</div></div></div>
+      <div className="card next-card card-pad"><div className="next-date"><strong>{new Date(current.startDate + 'T12:00:00').getDate()}</strong><span>{new Date(current.startDate + 'T12:00:00').toLocaleDateString(undefined, { month: 'short' })}</span></div><div><h3>Next up: fly to {current.destination}</h3><p>{selectedFlight ? `${selectedFlight.airline} \u00b7 ${current.originCode} \u2192 ${current.destinationCode}` : 'Select a flight'}</p></div><ChevronRight size={17} className="muted" /></div>
+    </div>
+
+    <div className="section-label"><h2>Trip Itinerary & Map</h2></div>
+    <div style={{ display: 'flex', gap: 7, overflow: 'auto', margin: '17px 0 14px' }}>{itinerary.map(d => <button key={d.n} className={`filter-pill ${day === d.n ? 'active' : ''}`} onClick={() => setDay(d.n)} data-testid={`button-day-${d.n}`}>Day {d.n} \u00b7 {d.date.slice(0, 3)}</button>)}</div>
+    <div className="itinerary-layout"><div className="grid">{itinerary.filter(d => d.n === day).map(d => <div className="card timeline-day" key={d.n}><div className="day-head"><div className="day-number"><div className="day-index">{String(d.n).padStart(2, '0')}</div><div><h3>{d.title}</h3><p>{d.date} \u00b7 {current.destination}</p></div></div><CloudSun size={19} className="muted" /></div><div className="timeline">{d.items.map((item, index) => { const nextItem = d.items[index + 1]; const dist = item.lat && item.lon && nextItem?.lat && nextItem?.lon ? haversineDistance(item.lat, item.lon, nextItem.lat, nextItem.lon) : 0; return <div className="timeline-item" key={`${item.time}-${index}`}><div className="timeline-dot" /><div className="time">{item.time}</div><div className="timeline-copy"><h4>{item.name}</h4><p>{item.note}</p>{item.cost > 0 && <span className="cost">${item.cost}</span>}{dist > 0.1 && <p style={{ marginTop: 4, fontSize: 10, color: 'hsl(var(--muted-foreground))' }}>\u2192 {dist < 2 ? estimateWalkingTime(dist) : estimateTransitTime(dist)} ({dist.toFixed(1)} km)</p>}</div></div>; })}</div></div>)}</div><MapPanel markers={markers} route={route} /></div>
   </div>;
 }
 
@@ -889,6 +919,23 @@ function Trips() {
   const handleCreate = (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.destination.trim()) return;
+    const preset = budgetPresets.find(p => p.tier === form.budgetTier);
+    const budgetAmount = preset?.amount ?? form.budgetAmount;
+    setPlans(calculatePlans(budgetAmount));
+  };
+
+  const [plans, setPlans] = useState<{name: string, description: string, budgetAllocation: BudgetAllocation}[] | null>(null);
+
+  const calculatePlans = (budget: number) => {
+    return [
+      { name: 'Optimal', description: 'Balanced focus on all aspects', budgetAllocation: { flights: Math.floor(budget * 0.3), accommodation: Math.floor(budget * 0.35), transportation: Math.floor(budget * 0.05), food: Math.floor(budget * 0.15), activities: budget - Math.floor(budget * 0.3) - Math.floor(budget * 0.35) - Math.floor(budget * 0.05) - Math.floor(budget * 0.15), other: 0 } },
+      { name: 'Comfort', description: 'Prioritizes accommodation & dining', budgetAllocation: { flights: Math.floor(budget * 0.25), accommodation: Math.floor(budget * 0.45), transportation: Math.floor(budget * 0.05), food: Math.floor(budget * 0.15), activities: budget - Math.floor(budget * 0.25) - Math.floor(budget * 0.45) - Math.floor(budget * 0.05) - Math.floor(budget * 0.15), other: 0 } },
+      { name: 'Balanced', description: 'Even spread across categories', budgetAllocation: { flights: Math.floor(budget * 0.3), accommodation: Math.floor(budget * 0.3), transportation: Math.floor(budget * 0.1), food: Math.floor(budget * 0.15), activities: budget - Math.floor(budget * 0.3) - Math.floor(budget * 0.3) - Math.floor(budget * 0.1) - Math.floor(budget * 0.15), other: 0 } },
+      { name: 'Budget Traveler', description: 'Save on stay, spend on food/flights', budgetAllocation: { flights: Math.floor(budget * 0.4), accommodation: Math.floor(budget * 0.2), transportation: Math.floor(budget * 0.1), food: Math.floor(budget * 0.2), activities: budget - Math.floor(budget * 0.4) - Math.floor(budget * 0.2) - Math.floor(budget * 0.1) - Math.floor(budget * 0.2), other: 0 } }
+    ];
+  };
+
+  const selectPlan = (planAlloc: BudgetAllocation) => {
     const dest = form.destination.trim();
     const code = dest.slice(0, 3).toUpperCase();
     const preset = budgetPresets.find(p => p.tier === form.budgetTier);
@@ -902,7 +949,7 @@ function Trips() {
       endDate: form.endDate || new Date(Date.now() + 37 * 86400000).toISOString().slice(0, 10),
       travelers: form.travelers,
       budget: { tier: form.budgetTier, amount: preset?.amount ?? form.budgetAmount, currency: form.budgetCurrency },
-      budgetAllocation: zeroBudgetAllocation,
+      budgetAllocation: planAlloc,
       selectedFlight: null,
       selectedStay: null,
       savedActivities: [],
@@ -910,12 +957,13 @@ function Trips() {
       itinerary: [],
     });
     setCreating(false);
+    setPlans(null);
     setForm({ name: '', destination: '', origin: '', startDate: '', endDate: '', travelers: 2, budgetTier: 'Standard', budgetAmount: 3500, budgetCurrency: 'USD' });
     setLocation('/');
   };
 
-  return <div className="page"><PageHeading eyebrow="Your library" title="My trips" description="Keep the plans worth returning to. TraveL& saves your choices locally." actions={<button className="btn btn-primary" onClick={() => setCreating(true)} data-testid="button-new-trip"><Plus /> Start a new trip</button>} />
-    {creating && <div className="card trip-create-form" style={{ marginBottom: 15 }}>
+  return <div className="page"><PageHeading eyebrow="Your library" title="My trips" description="Keep the plans worth returning to. TraveL& saves your choices locally." actions={<button className="btn btn-primary" onClick={() => {setCreating(true); setPlans(null);}} data-testid="button-new-trip"><Plus /> Start a new trip</button>} />
+    {creating && !plans && <div className="card trip-create-form" style={{ marginBottom: 15 }}>
       <form onSubmit={handleCreate}>
         <div className="section-label" style={{ margin: '0 0 10px' }}><h2>New trip</h2><button type="button" className="btn btn-ghost" onClick={() => setCreating(false)}><X /></button></div>
         <div className="trip-create-fields">
@@ -928,8 +976,28 @@ function Trips() {
           <label>Budget level<select value={form.budgetTier} onChange={e => { const tier = e.target.value as BudgetTier | 'Custom'; const p = budgetPresets.find(bp => bp.tier === tier); setForm({ ...form, budgetTier: tier, budgetAmount: p?.amount ?? form.budgetAmount }); }}><option value="Budget">Budget</option><option value="Economy">Economy</option><option value="Standard">Standard</option><option value="Premium">Premium</option><option value="Luxury">Luxury</option><option value="Custom">Custom</option></select></label>
           <label>Currency<select value={form.budgetCurrency} onChange={e => setForm({ ...form, budgetCurrency: e.target.value as BudgetCurrency })}>{currencies.map(c => <option key={c} value={c}>{c}</option>)}</select></label>
         </div>
-        <div style={{ display: 'flex', gap: 8, marginTop: 12 }}><button className="btn btn-primary" type="submit"><Plus /> Create trip</button><button className="btn btn-quiet" type="button" onClick={() => setCreating(false)}>Cancel</button></div>
+        <div style={{ display: 'flex', gap: 8, marginTop: 12 }}><button className="btn btn-primary" type="submit"><Plus /> Choose Plan</button><button className="btn btn-quiet" type="button" onClick={() => setCreating(false)}>Cancel</button></div>
       </form>
+    </div>}
+    {creating && plans && <div className="card trip-create-form" style={{ marginBottom: 15 }}>
+      <div className="section-label" style={{ margin: '0 0 10px' }}><h2>Select a Budget Plan</h2><button type="button" className="btn btn-ghost" onClick={() => setPlans(null)}>Back</button></div>
+      <div className="grid grid-2">
+        {plans.map((p, i) => (
+          <div className="card option-card" key={i} style={{ padding: '16px' }}>
+            <div className="option-top"><div><h3>{p.name}</h3><p>{p.description}</p></div></div>
+            <div className="option-details" style={{ marginTop: '12px' }}>
+              <div><span>Flights</span><strong>${p.budgetAllocation.flights}</strong></div>
+              <div><span>Accommodation</span><strong>${p.budgetAllocation.accommodation}</strong></div>
+              <div><span>Transport</span><strong>${p.budgetAllocation.transportation}</strong></div>
+              <div><span>Food</span><strong>${p.budgetAllocation.food}</strong></div>
+              <div><span>Activities</span><strong>${p.budgetAllocation.activities}</strong></div>
+            </div>
+            <div className="option-footer" style={{ marginTop: '16px' }}>
+              <button className="btn btn-primary" onClick={() => selectPlan(p.budgetAllocation)}>Choose This Plan</button>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>}
     <div className="grid grid-2">
       {store.trips.map((trip, index) => {
