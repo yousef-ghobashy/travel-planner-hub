@@ -539,7 +539,17 @@ function Dashboard() {
   }
 
   const { selectedPlan, days } = activeTrip;
-  const currentDay = days[selectedDayIndex];
+  const currentDay = days && days.length > 0 ? days[selectedDayIndex] : null;
+
+  if (!currentDay) {
+    return (
+      <div className="page" style={{ textAlign: 'center', marginTop: '50px' }}>
+        <h2>Invalid Trip Dates</h2>
+        <p>Your trip has no valid dates. Please create a new trip and ensure you select start and end dates.</p>
+        <button className="btn btn-primary" onClick={() => setLocation('/onboarding')}>Plan New Trip</button>
+      </div>
+    );
+  }
 
   // Calculate dynamic spent vs remaining
   const staticCosts = selectedPlan.allocations.flight + selectedPlan.allocations.hotel;
