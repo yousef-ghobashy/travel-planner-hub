@@ -609,8 +609,15 @@ function Home() {
   const [, setLocation] = useLocation();
   const { current, updateTrip } = useTripStore();
   const nights = calculateNights(current.startDate, current.endDate);
-  const selectedFlight = flights.find(f => f.id === current.selectedFlight);
-  const selectedStay = stays.find(s => s.id === current.selectedStay);
+  const selectedFlight = flights.find(f => f.id === current.selectedFlight) || 
+    (current.selectedFlight?.startsWith('flight-dummy') ? { 
+      id: current.selectedFlight, airline: 'Auto Airways', code: 'AUTO', out: '10:00', back: '18:00', duration: '5h', stops: 'Nonstop', price: Math.round(current.budgetAllocation.flights / current.travelers), note: 'Auto-selected'
+    } : undefined);
+    
+  const selectedStay = stays.find(s => s.id === current.selectedStay) ||
+    (current.selectedStay?.startsWith('stay-dummy') ? {
+      id: current.selectedStay, name: 'Auto Hotel', area: current.destination, rating: '8.5', price: Math.round(current.budgetAllocation.accommodation / calculateNights(current.startDate, current.endDate)), note: 'Auto-selected', features: [], lat: 41.3851, lon: 2.1834
+    } : undefined);
   const totalPlanned = current.budgetAllocation.flights + current.budgetAllocation.accommodation + current.budgetAllocation.transportation + current.budgetAllocation.food + current.budgetAllocation.activities + current.budgetAllocation.other;
   const progress = tripProgress(current);
 
@@ -652,6 +659,22 @@ function Home() {
       <div className="card stat-card"><div className="stat-icon"><CircleDollarSign /></div><div><div className="stat-value">{formatMoney(totalPlanned, current.budget.currency)}</div><div className="stat-note">budget allocated</div></div></div>
       <div className="card stat-card"><div className="stat-icon"><CloudSun /></div><div><div className="stat-value">20\u00b0</div><div className="stat-note">typical daytime high</div></div></div>
       <div className="card next-card card-pad"><div className="next-date"><strong>{new Date(current.startDate + 'T12:00:00').getDate()}</strong><span>{new Date(current.startDate + 'T12:00:00').toLocaleDateString(undefined, { month: 'short' })}</span></div><div><h3>Next up: fly to {current.destination}</h3><p>{selectedFlight ? `${selectedFlight.airline} \u00b7 ${current.originCode} \u2192 ${current.destinationCode}` : 'Select a flight'}</p></div><ChevronRight size={17} className="muted" /></div>
+    </div>
+
+    <div className="section-label"><h2>Pre-selected Picks</h2></div>
+    <div className="grid grid-2" style={{ marginBottom: '24px' }}>
+      <div className="card card-pad">
+        <div className="eyebrow">Flight</div>
+        <h3 style={{ margin: '8px 0' }}>{selectedFlight ? selectedFlight.airline : 'No flight selected'}</h3>
+        <p className="muted" style={{ fontSize: 13 }}>{selectedFlight ? `${current.originCode} \u2192 ${current.destinationCode} \u00b7 ${selectedFlight.duration}` : 'Go to Flights to select one.'}</p>
+        {selectedFlight && <button className="btn btn-quiet" style={{ marginTop: 12 }} onClick={() => fetchSearchLinks({ origin: current.originCode, destination: current.destinationCode, departureDate: current.startDate, returnDate: current.endDate, travelers: current.travelers }).then(links => window.open(links.flightSearchUrl, '_blank'))}><ExternalLink size={14} style={{ marginRight: 6 }} /> Book Externally</button>}
+      </div>
+      <div className="card card-pad">
+        <div className="eyebrow">Stay</div>
+        <h3 style={{ margin: '8px 0' }}>{selectedStay ? selectedStay.name : 'No stay selected'}</h3>
+        <p className="muted" style={{ fontSize: 13 }}>{selectedStay ? `${selectedStay.area} \u00b7 ${nights} nights` : 'Go to Stays to select one.'}</p>
+        {selectedStay && <button className="btn btn-quiet" style={{ marginTop: 12 }} onClick={() => fetchSearchLinks({ origin: current.originCode, destination: current.destinationCode, departureDate: current.startDate, returnDate: current.endDate, travelers: current.travelers }).then(links => window.open(links.accommodationSearchUrl, '_blank'))}><ExternalLink size={14} style={{ marginRight: 6 }} /> Book Externally</button>}
+      </div>
     </div>
 
     <div className="section-label"><h2>Trip Itinerary & Map</h2></div>
@@ -1065,8 +1088,159 @@ function Shell({ children }: { children: ReactNode }) {
 
 /* ─── Router & App ────────────────────────────────────────────────────────── */
 
+function Onboarding() {
+  const [, setLocation] = useLocation();
+  const [step, setStep] = useState(1);
+  const [form, setForm] = useState({ destination: '', budgetAmount: 3500, startDate: '', endDate: '', origin: '', travelers: 2 });
+  
+  const handleNext = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (step === 1 && !form.destination) return;
+    if (step === 3 && (!form.startDate || !form.endDate)) return;
+    if (step === 4 && !form.origin) return;
+
+    if (step < 5) setStep(step + 1);
+    else {
+      sessionStorage.setItem('onboardingForm', JSON.stringify(form));
+      setLocation('/plans');
+    }
+  };
+
+  return <div className="page" style={{ maxWidth: 600, margin: '40px auto' }}>
+    <PageHeading eyebrow={`Step ${step} of 5`} title={
+      step === 1 ? 'Where to?' : 
+      step === 2 ? 'What is your budget?' : 
+      step === 3 ? 'When are you going?' : 
+      step === 4 ? 'Where are you flying from?' : 
+      'How many travelers?'
+    } />
+    <div className="card card-pad" style={{ marginTop: 20 }}>
+      <form onSubmit={handleNext} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        {step === 1 && <label>Destination<input autoFocus value={form.destination} onChange={e => setForm({...form, destination: e.target.value})} placeholder="Paris, Rome, Tokyo..." required /></label>}
+        {step === 2 && <label>Budget (USD)<input type="number" min="100" step="100" value={form.budgetAmount} onChange={e => setForm({...form, budgetAmount: Number(e.target.value) || 3500})} required /></label>}
+        {step === 3 && <>
+          <label>Departure<input type="date" value={form.startDate} onChange={e => setForm({...form, startDate: e.target.value})} required /></label>
+          <label>Return<input type="date" value={form.endDate} onChange={e => setForm({...form, endDate: e.target.value})} required /></label>
+        </>}
+        {step === 4 && <label>Origin<input autoFocus value={form.origin} onChange={e => setForm({...form, origin: e.target.value})} placeholder="SFO, LHR, JFK..." required /></label>}
+        {step === 5 && <label>Travelers<input type="number" min="1" max="12" value={form.travelers} onChange={e => setForm({...form, travelers: Number(e.target.value) || 1})} required /></label>}
+        
+        <div style={{ display: 'flex', gap: 12, marginTop: 10 }}>
+          {step > 1 && <button type="button" className="btn btn-quiet" onClick={() => setStep(step - 1)}>Back</button>}
+          <button type="submit" className="btn btn-primary">{step === 5 ? 'See Plans' : 'Next'}</button>
+        </div>
+      </form>
+    </div>
+  </div>;
+}
+
+function Plans() {
+  const [, setLocation] = useLocation();
+  const { createTrip } = useTripStore();
+  const [loading, setLoading] = useState(false);
+  
+  const formStr = sessionStorage.getItem('onboardingForm');
+  const form = formStr ? JSON.parse(formStr) : { destination: 'Paris', budgetAmount: 3500, startDate: '2027-05-01', endDate: '2027-05-07', origin: 'SFO', travelers: 2 };
+
+  const plans = [
+    { name: 'Optimal', description: 'Balanced focus on all aspects', budgetAllocation: { flights: Math.floor(form.budgetAmount * 0.3), accommodation: Math.floor(form.budgetAmount * 0.35), transportation: Math.floor(form.budgetAmount * 0.05), food: Math.floor(form.budgetAmount * 0.15), activities: form.budgetAmount - Math.floor(form.budgetAmount * 0.3) - Math.floor(form.budgetAmount * 0.35) - Math.floor(form.budgetAmount * 0.05) - Math.floor(form.budgetAmount * 0.15), other: 0 } },
+    { name: 'Comfort', description: 'Prioritizes accommodation & dining', budgetAllocation: { flights: Math.floor(form.budgetAmount * 0.25), accommodation: Math.floor(form.budgetAmount * 0.45), transportation: Math.floor(form.budgetAmount * 0.05), food: Math.floor(form.budgetAmount * 0.15), activities: form.budgetAmount - Math.floor(form.budgetAmount * 0.25) - Math.floor(form.budgetAmount * 0.45) - Math.floor(form.budgetAmount * 0.05) - Math.floor(form.budgetAmount * 0.15), other: 0 } },
+    { name: 'Balanced', description: 'Even spread across categories', budgetAllocation: { flights: Math.floor(form.budgetAmount * 0.3), accommodation: Math.floor(form.budgetAmount * 0.3), transportation: Math.floor(form.budgetAmount * 0.1), food: Math.floor(form.budgetAmount * 0.15), activities: form.budgetAmount - Math.floor(form.budgetAmount * 0.3) - Math.floor(form.budgetAmount * 0.3) - Math.floor(form.budgetAmount * 0.1) - Math.floor(form.budgetAmount * 0.15), other: 0 } },
+    { name: 'Budget Traveler', description: 'Save on stay, spend on food/flights', budgetAllocation: { flights: Math.floor(form.budgetAmount * 0.4), accommodation: Math.floor(form.budgetAmount * 0.2), transportation: Math.floor(form.budgetAmount * 0.1), food: Math.floor(form.budgetAmount * 0.2), activities: form.budgetAmount - Math.floor(form.budgetAmount * 0.4) - Math.floor(form.budgetAmount * 0.2) - Math.floor(form.budgetAmount * 0.1) - Math.floor(form.budgetAmount * 0.2), other: 0 } }
+  ];
+
+  const handleSelect = (plan: typeof plans[0]) => {
+    setLoading(true);
+    setTimeout(() => {
+      const flightId = `flight-dummy-${Date.now()}`;
+      const stayId = `stay-dummy-${Date.now()}`;
+      
+      flights.push({
+        id: flightId, airline: 'Auto Airways', code: 'AUTO', out: '10:00', back: '18:00', duration: '5h', stops: 'Nonstop', price: Math.round(plan.budgetAllocation.flights / form.travelers), note: 'Auto-selected'
+      });
+      
+      stays.push({
+        id: stayId, name: 'Auto Hotel', area: form.destination, rating: '8.5', price: Math.round(plan.budgetAllocation.accommodation / calculateNights(form.startDate, form.endDate)), note: 'Auto-selected', features: [], lat: 41.3851, lon: 2.1834
+      });
+      
+      createTrip({
+        name: `${form.destination} trip`,
+        destination: form.destination,
+        destinationCode: form.destination.slice(0, 3).toUpperCase(),
+        origin: form.origin,
+        originCode: form.origin.slice(0, 3).toUpperCase(),
+        startDate: form.startDate,
+        endDate: form.endDate,
+        travelers: form.travelers,
+        budget: { tier: 'Custom', amount: form.budgetAmount, currency: 'USD' },
+        budgetAllocation: plan.budgetAllocation,
+        selectedFlight: flightId,
+        selectedStay: stayId,
+        savedActivities: [],
+        selectedLivePlaces: [],
+        itinerary: [],
+      });
+      setLocation('/');
+    }, 2000);
+  };
+
+  if (loading) return <div className="page" style={{ maxWidth: 600, margin: '40px auto' }}><div className="card card-pad loading-card">Searching for flights and hotels within your budget...</div></div>;
+
+  return <div className="page" style={{ maxWidth: 800, margin: '40px auto' }}>
+    <PageHeading eyebrow="Trip Planning" title="Choose a Budget Plan" description={`Select how you want to allocate your $${form.budgetAmount} budget.`} actions={<button className="btn btn-quiet" onClick={() => setLocation('/onboarding')}>Back</button>} />
+    <div className="grid grid-2" style={{ marginTop: 20 }}>
+      {plans.map((p, i) => (
+        <div className="card option-card" key={i}>
+          <div className="option-card-body">
+            <div className="option-top"><div><h3>{p.name}</h3><p>{p.description}</p></div></div>
+            <div className="option-details" style={{ marginTop: 16 }}>
+              <div><span>Flights</span><strong>${p.budgetAllocation.flights}</strong></div>
+              <div><span>Accommodation</span><strong>${p.budgetAllocation.accommodation}</strong></div>
+              <div><span>Transport</span><strong>${p.budgetAllocation.transportation}</strong></div>
+              <div><span>Food</span><strong>${p.budgetAllocation.food}</strong></div>
+              <div><span>Activities</span><strong>${p.budgetAllocation.activities}</strong></div>
+            </div>
+            <div className="option-footer" style={{ marginTop: 16 }}>
+              <button className="btn btn-primary" onClick={() => handleSelect(p)} style={{ width: '100%' }}>Choose This Plan</button>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>;
+}
+
 function Router() {
-  return <Shell><Switch><Route path="/" component={Home} /><Route path="/flights" component={Flights} /><Route path="/stays" component={Stays} /><Route path="/explore" component={Explore} /><Route path="/itinerary" component={Itinerary} /><Route path="/budget" component={Budget} /><Route path="/packing" component={Packing} /><Route path="/trips" component={Trips} /><Route component={NotFound} /></Switch></Shell>;
+  const { store } = useTripStore();
+  const [location, setLocation] = useLocation();
+
+  useEffect(() => {
+    if (store.trips.length === 0 && location === '/') {
+      setLocation('/onboarding');
+    }
+  }, [store.trips.length, location, setLocation]);
+
+  return (
+    <Switch>
+      <Route path="/onboarding" component={Onboarding} />
+      <Route path="/plans" component={Plans} />
+      <Route>
+        <Shell>
+          <Switch>
+            <Route path="/" component={Home} />
+            <Route path="/flights" component={Flights} />
+            <Route path="/stays" component={Stays} />
+            <Route path="/explore" component={Explore} />
+            <Route path="/itinerary" component={Itinerary} />
+            <Route path="/budget" component={Budget} />
+            <Route path="/packing" component={Packing} />
+            <Route path="/trips" component={Trips} />
+            <Route component={NotFound} />
+          </Switch>
+        </Shell>
+      </Route>
+    </Switch>
+  );
 }
 
 function App() {
