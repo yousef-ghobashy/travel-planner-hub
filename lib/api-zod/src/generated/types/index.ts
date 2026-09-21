@@ -7,10 +7,15 @@
  */
 
 export * from './errorResponse';
+export * from './getTravelExchangeRateParams';
 export * from './getTravelSearchLinksParams';
 export * from './getTravelWeatherParams';
 export * from './healthStatus';
+export * from './searchTravelAirportsParams';
 export * from './searchTravelPlacesParams';
+export * from './travelAirport';
+export * from './travelAirportsResponse';
+export * from './travelExchangeRateResponse';
 export * from './travelPlace';
 export * from './travelPlacesResponse';
 export * from './travelSearchLinksResponse';

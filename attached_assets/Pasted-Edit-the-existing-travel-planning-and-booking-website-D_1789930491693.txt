@@ -1,0 +1,377 @@
+Edit the existing travel planning and booking website. Do not rebuild the project from scratch and do not remove existing features. Keep the current structure, pages, components, and functionality unless specifically changed below.
+
+Apply the following updates:
+
+## 1. Use Free APIs / Free Tiers
+
+Replace any placeholder or unnecessary paid API dependency with **free APIs or APIs that provide a usable free/developer tier** wherever possible.
+
+Use appropriate free sources for:
+
+### Flights
+
+Use a legitimate flight API with a free/developer tier, such as:
+
+* Amadeus Self-Service APIs
+* Another legitimate flight-search API with a free tier
+
+The flight system must retrieve real search results when the API supports it.
+
+Do not fabricate flight prices, availability, airlines, durations, or booking information.
+
+### Cities and Countries
+
+Use free/open APIs such as:
+
+* REST Countries
+* GeoDB Cities free tier
+* OpenStreetMap / Nominatim
+* Other legitimate free geographic APIs
+
+Use them for:
+
+* Countries
+* Cities
+* Airports
+* City/airport relationships
+* Geographic information
+
+### Hotels / Motels
+
+Use free/open or free-tier APIs where available.
+
+Possible sources:
+
+* OpenStreetMap
+* Overpass API
+* Geoapify free tier
+* Other legitimate accommodation/location APIs with free access
+
+Support:
+
+* Hotels
+* Motels
+* Hostels
+* Apartments
+* Resorts
+
+Do not invent hotel availability, ratings, reviews, or prices.
+
+### Attractions
+
+Use free/open sources such as:
+
+* OpenStreetMap
+* Overpass API
+* Wikidata
+* Other legitimate free tourism/places APIs
+
+### Maps
+
+Use:
+
+* OpenStreetMap
+* Leaflet
+* Mapbox free tier where appropriate
+
+### Weather
+
+Use a free API such as Open-Meteo where appropriate.
+
+### Currency
+
+Use a free exchange-rate API.
+
+Keep the API architecture modular so providers can be replaced later without changing the frontend.
+
+---
+
+# 2. Add a Budget Selection System
+
+Improve the existing trip search form by making the user's budget a required part of the planning process.
+
+Allow the user to choose between:
+
+### Predefined Budget
+
+* Budget
+* Economy
+* Standard
+* Premium
+* Luxury
+
+### Custom Budget
+
+Add a field:
+
+**My Budget**
+
+Allow the user to enter any amount manually.
+
+Also add:
+
+**Currency**
+
+Examples:
+
+* EGP
+* USD
+* EUR
+* GBP
+
+The user must be able to change their budget at any time.
+
+---
+
+# 3. Make Recommendations Budget-Aware
+
+All recommendations should use the user's selected budget.
+
+The system should consider the budget when recommending:
+
+* Flights
+* Hotels
+* Motels
+* Transportation
+* Activities
+* Complete itineraries
+
+Show the budget status clearly:
+
+* Within Budget
+* Near Budget
+* Over Budget
+
+Also display the estimated spending breakdown.
+
+Example:
+
+**Total Budget: $1,500**
+
+Flight: $450
+Hotel: $500
+Transportation: $150
+Food: $250
+Activities: $100
+Other: $50
+
+Then show:
+
+**Estimated Total: $1,500**
+
+Allow recommendations to update dynamically when the user changes the budget.
+
+---
+
+# 4. Fix Airport Search Display
+
+Modify the airport/city search so the **city name is the primary visible result**, not the airport abbreviation.
+
+Do NOT make results look like:
+
+**CAI**
+
+Instead display:
+
+**Cairo, Egypt**
+
+Then show the airport information underneath:
+
+**Cairo International Airport · CAI**
+
+Examples:
+
+Instead of:
+
+CAI
+
+Display:
+
+**Cairo, Egypt**
+Cairo International Airport · CAI
+
+Instead of:
+
+CDG
+
+Display:
+
+**Paris, France**
+Charles de Gaulle Airport · CDG
+
+Instead of:
+
+JFK
+
+Display:
+
+**New York, USA**
+John F. Kennedy International Airport · JFK
+
+### Search behavior
+
+The search should still accept:
+
+* City name
+* Airport name
+* Airport code
+* Country
+
+But the result card/autocomplete should prioritize:
+
+**City, Country**
+
+with the airport name and IATA code as secondary information.
+
+The IATA code should never be the main large title in the search result.
+
+---
+
+# 5. Improve Airport Autocomplete
+
+Make the airport autocomplete cleaner and easier to understand.
+
+Each result should use this layout:
+
+**Cairo, Egypt**
+Cairo International Airport
+CAI
+
+**London, United Kingdom**
+Heathrow Airport
+LHR
+
+The city should have the strongest visual hierarchy.
+
+Use subtle icons and spacing, while keeping the existing minimal design.
+
+---
+
+# 6. Improve Dark Mode Notes
+
+Fix the visibility of notes and informational messages in dark mode.
+
+Currently, notes may have insufficient contrast.
+
+Update all dark-mode:
+
+* Notes
+* Tips
+* Information boxes
+* Warnings
+* Important messages
+* Informational callouts
+
+so they are clearly visible.
+
+### Dark Mode Note Requirements
+
+Use:
+
+* Clearly distinguishable dark surface
+* Brighter border/accent
+* High-contrast text
+* Visible icon
+* Sufficient contrast against the background
+
+Do not use extremely dark gray, dark beige, or muted colors that disappear into the dark background.
+
+The note should remain visually noticeable without becoming overly bright or distracting.
+
+Example structure:
+
+**Info icon**
+Important information text
+
+Use accessible contrast ratios for both text and UI elements.
+
+---
+
+# 7. Preserve the Existing Design
+
+Keep the current website's:
+
+* Minimal design
+* Modern layout
+* Calm color palette
+* Typography
+* Navigation
+* Existing components
+* Existing pages
+* Existing booking flow
+
+Do not introduce unnecessary visual changes.
+
+The new functionality should feel naturally integrated into the existing UI.
+
+---
+
+# 8. Preserve Booking Functionality
+
+Do not remove the existing booking system.
+
+Maintain the ability to book:
+
+* Flights
+* Hotels
+* Motels
+* Activities
+* Transportation
+
+Use real provider APIs where actual booking is supported.
+
+When a provider only supports search or redirects, clearly distinguish between:
+
+**Search / View Deal**
+
+and
+
+**Book Now**
+
+Never display fake booking confirmation as a real reservation.
+
+---
+
+# 9. Data Reliability
+
+Clearly distinguish between:
+
+* Real API data
+* Cached data
+* Estimated data
+* Demo data
+
+Never fabricate:
+
+* Flight prices
+* Hotel prices
+* Availability
+* Ratings
+* Reviews
+* Booking confirmations
+
+When APIs are unavailable during development, use clearly labeled:
+
+**Demo Data**
+
+Do not make demo data appear to be real-time booking data.
+
+---
+
+# 10. Final Implementation Goal
+
+After these edits, the existing website should provide:
+
+**Free/Free-Tier API Integration**
++
+**User-Defined Budget**
++
+**Budget-Aware Recommendations**
++
+**City-First Airport Search**
++
+**Better Dark Mode Notes**
++
+**Existing Booking Functionality**
+
+The final result should remain minimal, modern, calm, responsive, and easy to use.

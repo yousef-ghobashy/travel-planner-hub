@@ -72,6 +72,46 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+  /travel/airports:
+    get:
+      operationId: searchTravelAirports
+      tags: [travel]
+      summary: Search airports by city, name, country, or code
+      description: Searches the public OurAirports dataset and returns city-first airport results.
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+            minLength: 2
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 10
+            default: 6
+      responses:
+        "200":
+          description: Airport search results
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TravelAirportsResponse"
+        "400":
+          description: Invalid search
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "502":
+          description: Upstream airport data provider unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
   /travel/weather:
     get:
       operationId: getTravelWeather
@@ -164,6 +204,46 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+  /travel/exchange-rate:
+    get:
+      operationId: getTravelExchangeRate
+      tags: [travel]
+      summary: Get a free currency conversion rate
+      description: Gets a current exchange rate from a no-key exchange-rate provider. Estimates remain clearly labeled when conversion is unavailable.
+      parameters:
+        - name: from
+          in: query
+          required: true
+          schema:
+            type: string
+            minLength: 3
+            maxLength: 3
+        - name: to
+          in: query
+          required: true
+          schema:
+            type: string
+            minLength: 3
+            maxLength: 3
+      responses:
+        "200":
+          description: Currency conversion rate
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TravelExchangeRateResponse"
+        "400":
+          description: Invalid currency
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "502":
+          description: Upstream exchange-rate provider unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 components:
   schemas:
     HealthStatus:
@@ -236,6 +316,49 @@ components:
         - source
         - retrievedAt
         - places
+    TravelAirport:
+      type: object
+      properties:
+        id:
+          type: string
+        city:
+          type: string
+        country:
+          type: string
+        airportName:
+          type: string
+        iataCode:
+          type: string
+        latitude:
+          type: number
+        longitude:
+          type: number
+        source:
+          type: string
+      required:
+        - id
+        - city
+        - country
+        - airportName
+        - iataCode
+        - latitude
+        - longitude
+        - source
+    TravelAirportsResponse:
+      type: object
+      properties:
+        query:
+          type: string
+        source:
+          type: string
+        airports:
+          type: array
+          items:
+            $ref: "#/components/schemas/TravelAirport"
+      required:
+        - query
+        - source
+        - airports
     TravelWeatherDay:
       type: object
       properties:
@@ -305,4 +428,24 @@ components:
         - accommodationSearchUrl
         - source
         - note
+    TravelExchangeRateResponse:
+      type: object
+      properties:
+        from:
+          type: string
+        to:
+          type: string
+        rate:
+          type: number
+        source:
+          type: string
+        retrievedAt:
+          type: string
+          format: date-time
+      required:
+        - from
+        - to
+        - rate
+        - source
+        - retrievedAt
 

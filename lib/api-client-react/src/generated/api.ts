@@ -17,10 +17,14 @@ import type {
 
 import type {
   ErrorResponse,
+  GetTravelExchangeRateParams,
   GetTravelSearchLinksParams,
   GetTravelWeatherParams,
   HealthStatus,
+  SearchTravelAirportsParams,
   SearchTravelPlacesParams,
+  TravelAirportsResponse,
+  TravelExchangeRateResponse,
   TravelPlacesResponse,
   TravelSearchLinksResponse,
   TravelWeatherResponse
@@ -216,6 +220,91 @@ export function useSearchTravelPlaces<TData = Awaited<ReturnType<typeof searchTr
 
 
 
+export const getSearchTravelAirportsUrl = (params: SearchTravelAirportsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/travel/airports?${stringifiedParams}` : `/api/travel/airports`
+}
+
+/**
+ * Searches the public OurAirports dataset and returns city-first airport results.
+ * @summary Search airports by city, name, country, or code
+ */
+export const searchTravelAirports = async (params: SearchTravelAirportsParams, options?: Parameters<typeof customFetch>[1]): Promise<TravelAirportsResponse> => {
+
+  return customFetch<TravelAirportsResponse>(getSearchTravelAirportsUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getSearchTravelAirportsQueryKey = (params?: SearchTravelAirportsParams,) => {
+    return [
+    `/api/travel/airports`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getSearchTravelAirportsQueryOptions = <TData = Awaited<ReturnType<typeof searchTravelAirports>>, TError = ErrorType<ErrorResponse>>(params: SearchTravelAirportsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof searchTravelAirports>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getSearchTravelAirportsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof searchTravelAirports>>> = ({ signal }) => searchTravelAirports(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof searchTravelAirports>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type SearchTravelAirportsQueryResult = NonNullable<Awaited<ReturnType<typeof searchTravelAirports>>>
+export type SearchTravelAirportsQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary Search airports by city, name, country, or code
+ */
+
+export function useSearchTravelAirports<TData = Awaited<ReturnType<typeof searchTravelAirports>>, TError = ErrorType<ErrorResponse>>(
+ params: SearchTravelAirportsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof searchTravelAirports>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getSearchTravelAirportsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
 export const getGetTravelWeatherUrl = (params: GetTravelWeatherParams,) => {
   const normalizedParams = new URLSearchParams();
 
@@ -374,6 +463,91 @@ export function useGetTravelSearchLinks<TData = Awaited<ReturnType<typeof getTra
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
   const queryOptions = getGetTravelSearchLinksQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetTravelExchangeRateUrl = (params: GetTravelExchangeRateParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/travel/exchange-rate?${stringifiedParams}` : `/api/travel/exchange-rate`
+}
+
+/**
+ * Gets a current exchange rate from a no-key exchange-rate provider. Estimates remain clearly labeled when conversion is unavailable.
+ * @summary Get a free currency conversion rate
+ */
+export const getTravelExchangeRate = async (params: GetTravelExchangeRateParams, options?: Parameters<typeof customFetch>[1]): Promise<TravelExchangeRateResponse> => {
+
+  return customFetch<TravelExchangeRateResponse>(getGetTravelExchangeRateUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetTravelExchangeRateQueryKey = (params?: GetTravelExchangeRateParams,) => {
+    return [
+    `/api/travel/exchange-rate`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetTravelExchangeRateQueryOptions = <TData = Awaited<ReturnType<typeof getTravelExchangeRate>>, TError = ErrorType<ErrorResponse>>(params: GetTravelExchangeRateParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getTravelExchangeRate>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetTravelExchangeRateQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getTravelExchangeRate>>> = ({ signal }) => getTravelExchangeRate(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getTravelExchangeRate>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetTravelExchangeRateQueryResult = NonNullable<Awaited<ReturnType<typeof getTravelExchangeRate>>>
+export type GetTravelExchangeRateQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary Get a free currency conversion rate
+ */
+
+export function useGetTravelExchangeRate<TData = Awaited<ReturnType<typeof getTravelExchangeRate>>, TError = ErrorType<ErrorResponse>>(
+ params: GetTravelExchangeRateParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getTravelExchangeRate>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetTravelExchangeRateQueryOptions(params,options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 

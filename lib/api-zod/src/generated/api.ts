@@ -56,6 +56,38 @@ export const SearchTravelPlacesResponse = zod.object({
 
 
 /**
+ * Searches the public OurAirports dataset and returns city-first airport results.
+ * @summary Search airports by city, name, country, or code
+ */
+export const searchTravelAirportsQueryQMin = 2;
+
+export const searchTravelAirportsQueryLimitDefault = 6;
+export const searchTravelAirportsQueryLimitMax = 10;
+
+
+
+export const SearchTravelAirportsQueryParams = zod.object({
+  "q": zod.coerce.string().min(searchTravelAirportsQueryQMin),
+  "limit": zod.coerce.number().int().min(1).max(searchTravelAirportsQueryLimitMax).default(searchTravelAirportsQueryLimitDefault)
+})
+
+export const SearchTravelAirportsResponse = zod.object({
+  "query": zod.string(),
+  "source": zod.string(),
+  "airports": zod.array(zod.object({
+  "id": zod.string(),
+  "city": zod.string(),
+  "country": zod.string(),
+  "airportName": zod.string(),
+  "iataCode": zod.string(),
+  "latitude": zod.number(),
+  "longitude": zod.number(),
+  "source": zod.string()
+}))
+})
+
+
+/**
  * Gets a no-key forecast from Open-Meteo for a destination and date range.
  * @summary Get a destination forecast
  */
@@ -114,6 +146,32 @@ export const GetTravelSearchLinksResponse = zod.object({
   "accommodationSearchUrl": zod.string(),
   "source": zod.string(),
   "note": zod.string()
+})
+
+
+/**
+ * Gets a current exchange rate from a no-key exchange-rate provider. Estimates remain clearly labeled when conversion is unavailable.
+ * @summary Get a free currency conversion rate
+ */
+export const getTravelExchangeRateQueryFromMin = 3;
+export const getTravelExchangeRateQueryFromMax = 3;
+
+export const getTravelExchangeRateQueryToMin = 3;
+export const getTravelExchangeRateQueryToMax = 3;
+
+
+
+export const GetTravelExchangeRateQueryParams = zod.object({
+  "from": zod.coerce.string().min(getTravelExchangeRateQueryFromMin).max(getTravelExchangeRateQueryFromMax),
+  "to": zod.coerce.string().min(getTravelExchangeRateQueryToMin).max(getTravelExchangeRateQueryToMax)
+})
+
+export const GetTravelExchangeRateResponse = zod.object({
+  "from": zod.string(),
+  "to": zod.string(),
+  "rate": zod.number(),
+  "source": zod.string(),
+  "retrievedAt": zod.coerce.date()
 })
 
 

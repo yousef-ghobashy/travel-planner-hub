@@ -37,6 +37,23 @@ export interface TravelPlacesResponse {
   places: TravelPlace[];
 }
 
+export interface TravelAirport {
+  id: string;
+  city: string;
+  country: string;
+  airportName: string;
+  iataCode: string;
+  latitude: number;
+  longitude: number;
+  source: string;
+}
+
+export interface TravelAirportsResponse {
+  query: string;
+  source: string;
+  airports: TravelAirport[];
+}
+
 export interface TravelWeatherDay {
   date: string;
   weatherCode: number;
@@ -65,6 +82,14 @@ export interface TravelSearchLinksResponse {
   note: string;
 }
 
+export interface TravelExchangeRateResponse {
+  from: string;
+  to: string;
+  rate: number;
+  source: string;
+  retrievedAt: string;
+}
+
 export type SearchTravelPlacesParams = {
 /**
  * @minLength 2
@@ -74,6 +99,18 @@ kind?: string;
 /**
  * @minimum 1
  * @maximum 30
+ */
+limit?: number;
+};
+
+export type SearchTravelAirportsParams = {
+/**
+ * @minLength 2
+ */
+q: string;
+/**
+ * @minimum 1
+ * @maximum 10
  */
 limit?: number;
 };
@@ -103,5 +140,18 @@ returnDate?: string;
  * @maximum 12
  */
 travelers?: number;
+};
+
+export type GetTravelExchangeRateParams = {
+/**
+ * @minLength 3
+ * @maxLength 3
+ */
+from: string;
+/**
+ * @minLength 3
+ * @maxLength 3
+ */
+to: string;
 };
 
