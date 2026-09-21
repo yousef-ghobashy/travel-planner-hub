@@ -98,7 +98,12 @@ const initialOnboarding: OnboardingData = {
 /* ─── Utils ──────────────────────────────────────────────────────────────── */
 
 function formatMoney(amount: number, currency: string) {
-  return new Intl.NumberFormat(undefined, { style: 'currency', currency, maximumFractionDigits: 0 }).format(amount);
+  const safeCurrency = currency || 'USD';
+  try {
+    return new Intl.NumberFormat(undefined, { style: 'currency', currency: safeCurrency, maximumFractionDigits: 0 }).format(amount || 0);
+  } catch (e) {
+    return `$${amount || 0}`;
+  }
 }
 
 function calculateDays(start: string, end: string) {
@@ -539,6 +544,17 @@ function Dashboard() {
   }
 
   const { selectedPlan, days } = activeTrip;
+  
+  if (!selectedPlan || !selectedPlan.allocations) {
+    return (
+      <div className="page" style={{ textAlign: 'center', marginTop: '50px' }}>
+        <h2>Invalid Trip Plan</h2>
+        <p>Your saved trip is missing budget allocations. Please start over.</p>
+        <button className="btn btn-primary" onClick={() => { localStorage.clear(); setLocation('/onboarding'); }}>Plan New Trip</button>
+      </div>
+    );
+  }
+
   const currentDay = days && days.length > 0 ? days[selectedDayIndex] : null;
 
   if (!currentDay) {
