@@ -176,14 +176,14 @@ function PageHeading({ eyebrow, title, description, actions }: { eyebrow: string
   );
 }
 
-function AutocompleteInput({ value, onChange, placeholder, label }: { value: string; onChange: (v: string) => void; placeholder: string; label: string }) {
-  const [query, setQuery] = useState(value);
+function AutocompleteInput({ value = '', onChange, placeholder, label }: { value?: string; onChange: (v: string) => void; placeholder: string; label: string }) {
+  const [query, setQuery] = useState(value || '');
   const [results, setResults] = useState<{name: string}[]>([]);
   const [focused, setFocused] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(async () => {
-      if (query.length >= 2 && query !== value) {
+      if (query && query.length >= 2 && query !== value) {
         const res = await fetchNominatimAutocomplete(query);
         setResults(res);
       }
