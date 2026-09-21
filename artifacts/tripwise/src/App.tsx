@@ -7,26 +7,110 @@ import {
   Plane, Plus, Search, Settings2, Share2, Sparkles, Sun, Ticket, TrainFront,
   Trash2, Utensils, WalletCards, X,
 } from 'lucide-react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import {
-  getGetTravelSearchLinksQueryKey,
-  getGetTravelWeatherQueryKey,
-  getGetTravelExchangeRateQueryKey,
-  getSearchTravelAirportsQueryKey,
-  getSearchTravelPlacesQueryKey,
-  useGetTravelSearchLinks,
-  useGetTravelWeather,
-  useGetTravelExchangeRate,
-  useSearchTravelAirports,
-  useSearchTravelPlaces,
-} from '@workspace/api-client-react';
+import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-query';
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
 const queryClient = new QueryClient();
 
-/* ─── Types ──────────────────────────────────────────────────────────────── */
+/* ─── API Local ──────────────────────────────────────────────────────────── */
+
+async function fetchSearchLinks(params: { origin: string, destination: string, departureDate: string, returnDate?: string, travelers?: number }) {
+  const dep = params.departureDate;
+  const ret = params.returnDate ? `/${params.returnDate}` : '';
+  return {
+    flightSearchUrl: `https://www.google.com/travel/flights?q=Flights%20to%20${params.destination}%20from%20${params.origin}%20on%20${dep}${ret ? `%20through%20${params.returnDate}` : ''}`,
+    accommodationSearchUrl: `https://www.booking.com/searchresults.html?ss=${encodeURIComponent(params.destination)}&checkin=${dep}&checkout=${params.returnDate || ''}&group_adults=${params.travelers || 1}`,
+  };
+}
+
+async function fetchExchangeRate(from: string, to: string) {
+  if (from === to) return { rate: 1, retrievedAt: new Date().toISOString() };
+  const res = await fetch(`https://open.er-api.com/v6/latest/${from}`);
+  const data = await res.json();
+  return { rate: data.rates[to] || 1, retrievedAt: new Date().toISOString() };
+}
+
+async function fetchWeather(city: string) {
+  const geoRes = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(city)}&format=json&limit=1`);
+  const geoData = await geoRes.json();
+  if (!geoData.length) throw new Error('City not found');
+  const lat = geoData[0].lat;
+  const lon = geoData[0].lon;
+  const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=auto`);
+  const weatherData = await weatherRes.json();
+  const days: { date: string; minC: number; maxC: number; precipitationProbability: number }[] = weatherData.daily.time.map((t: string, i: number) => ({
+    date: t,
+    minC: weatherData.daily.temperature_2m_min[i],
+    maxC: weatherData.daily.temperature_2m_max[i],
+    precipitationProbability: weatherData.daily.precipitation_probability_max[i],
+  }));
+  return { city, retrievedAt: new Date().toISOString(), days, note: undefined };
+}
+
+async function fetchPlaces(city: string, kind: string = 'lodging') {
+  const geoRes = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(city)}&format=json&limit=1`);
+  const geoData = await geoRes.json();
+  if (!geoData.length) throw new Error('City not found');
+  const lat = parseFloat(geoData[0].lat);
+  const lon = parseFloat(geoData[0].lon);
+
+  const mapping: Record<string, string> = {
+    lodging: 'tourism~"hotel|motel|hostel|guest_house|apartment"',
+    hotel: 'tourism="hotel"',
+    motel: 'tourism="motel"',
+    hostel: 'tourism="hostel"',
+    apartment: 'tourism="apartment"',
+    guest_house: 'tourism="guest_house"'
+  };
+  const tag = mapping[kind] || mapping.lodging;
+  const around = 5000;
+  const query = `[out:json];(node[${tag}](around:${around},${lat},${lon});way[${tag}](around:${around},${lat},${lon});relation[${tag}](around:${around},${lat},${lon}););out center;`;
+  
+  const overpassRes = await fetch('https://overpass-api.de/api/interpreter', { method: 'POST', body: query });
+  const data = await overpassRes.json();
+  
+  const places: { id: string; name: string; category: string; address?: string; website?: string; mapLink: string; lat: number; lon: number }[] = data.elements.map((el: any) => ({
+    id: el.id.toString(),
+    name: el.tags?.name || 'Unnamed place',
+    category: el.tags?.tourism || 'lodging',
+    address: [el.tags?.['addr:street'], el.tags?.['addr:housenumber']].filter(Boolean).join(' ') || undefined,
+    website: el.tags?.website,
+    mapLink: `https://www.openstreetmap.org/${el.type}/${el.id}`,
+    lat: el.lat || el.center?.lat,
+    lon: el.lon || el.center?.lon,
+  })).slice(0, 12);
+
+  return { city, retrievedAt: new Date().toISOString(), places };
+}
+
+let cachedAirports: any[] | null = null;
+async function fetchAirports(q: string) {
+  if (!cachedAirports) {
+    const res = await fetch('https://raw.githubusercontent.com/mwgg/Airports/master/airports.json');
+    const data = await res.json();
+    cachedAirports = Object.values(data);
+  }
+  const query = q.toLowerCase();
+  const matched = (cachedAirports as any[]).filter(a => 
+    a.iata && a.iata !== '\\\\N' && (
+      a.iata.toLowerCase().includes(query) || 
+      (a.city && a.city.toLowerCase().includes(query)) ||
+      (a.name && a.name.toLowerCase().includes(query))
+    )
+  ).slice(0, 6).map(a => ({
+    id: a.iata,
+    iataCode: a.iata,
+    city: a.city,
+    country: a.country,
+    airportName: a.name,
+    lat: parseFloat(a.lat),
+    lon: parseFloat(a.lon)
+  }));
+  return { airports: matched };
+}
+
 
 type BudgetTier = 'Budget' | 'Economy' | 'Standard' | 'Premium' | 'Luxury';
 type BudgetCurrency = 'USD' | 'EGP' | 'EUR' | 'GBP';
@@ -471,7 +555,7 @@ function BudgetControls({ budget, setBudget }: { budget: BudgetSettings; setBudg
 function AirportAutocomplete({ label, value, onChange }: { label: string; value: string; onChange: (value: string, city?: string) => void }) {
   const [focused, setFocused] = useState(false);
   const params = { q: value.trim(), limit: 6 };
-  const airports = useSearchTravelAirports(params, { query: { enabled: params.q.length >= 2, staleTime: 3600000, queryKey: getSearchTravelAirportsQueryKey(params) } });
+  const airports = useQuery({ queryKey: ['airports', params.q], queryFn: () => fetchAirports(params.q), enabled: params.q.length >= 2, staleTime: 3600000 });
   return <label className="airport-autocomplete">{label}<input value={value} onFocus={() => setFocused(true)} onChange={event => onChange(event.target.value)} onBlur={() => window.setTimeout(() => setFocused(false), 150)} placeholder="City, airport, or code" autoComplete="off" />
     {focused && value.trim().length >= 2 && airports.data?.airports.length ? <div className="airport-results">{airports.data.airports.map(airport => <button type="button" className="airport-result" key={airport.id} onMouseDown={() => onChange(airport.iataCode, airport.city)}><strong>{airport.city}, {airport.country}</strong><span>{airport.airportName}</span><small>{airport.iataCode}</small></button>)}</div> : null}
   </label>;
@@ -551,10 +635,10 @@ function Flights() {
   const nights = calculateNights(current.startDate, current.endDate);
   const [search, setSearch] = useState({ origin: current.origin || 'SFO', destination: current.destination || 'Barcelona', departureDate: current.startDate, returnDate: current.endDate, travelers: current.travelers });
   const [submitted, setSubmitted] = useState(search);
-  const links = useGetTravelSearchLinks(submitted, { query: { staleTime: 300000, queryKey: getGetTravelSearchLinksQueryKey(submitted) } });
+  const links = useQuery({ queryKey: ['links', submitted], queryFn: () => fetchSearchLinks(submitted), staleTime: 300000 });
   const weatherParams = { city: submitted.destination, startDate: submitted.departureDate, endDate: submitted.returnDate };
-  const weather = useGetTravelWeather(weatherParams, { query: { staleTime: 300000, queryKey: getGetTravelWeatherQueryKey(weatherParams) } });
-  const exchange = useGetTravelExchangeRate({ from: 'USD', to: current.budget.currency }, { query: { staleTime: 3600000, queryKey: getGetTravelExchangeRateQueryKey({ from: 'USD', to: current.budget.currency }) } });
+  const weather = useQuery({ queryKey: ['weather', weatherParams.city], queryFn: () => fetchWeather(weatherParams.city), staleTime: 300000 });
+  const exchange = useQuery({ queryKey: ['exchange', current.budget.currency], queryFn: () => fetchExchangeRate('USD', current.budget.currency), staleTime: 3600000 });
   const rate = current.budget.currency === 'USD' ? 1 : exchange.data?.rate ?? 1;
 
   const selectFlight = (flightId: string) => {
@@ -599,16 +683,16 @@ function Flights() {
 function Stays() {
   const { current, updateTrip } = useTripStore();
   const nights = calculateNights(current.startDate, current.endDate);
-  const exchange = useGetTravelExchangeRate({ from: 'USD', to: current.budget.currency }, { query: { staleTime: 3600000, queryKey: getGetTravelExchangeRateQueryKey({ from: 'USD', to: current.budget.currency }) } });
+  const exchange = useQuery({ queryKey: ['exchange', current.budget.currency], queryFn: () => fetchExchangeRate('USD', current.budget.currency), staleTime: 3600000 });
   const rate = current.budget.currency === 'USD' ? 1 : exchange.data?.rate ?? 1;
   const [city, setCity] = useState(current.destination || 'Barcelona');
   const [submittedCity, setSubmittedCity] = useState(current.destination || 'Barcelona');
   const [propertyType, setPropertyType] = useState('lodging');
   const propertyTypes = [{ value: 'lodging', label: 'All' }, { value: 'hotel', label: 'Hotel' }, { value: 'motel', label: 'Motel' }, { value: 'hostel', label: 'Hostel' }, { value: 'apartment', label: 'Apartment' }, { value: 'guest_house', label: 'Guesthouse' }];
   const placesParams = { city: submittedCity, kind: propertyType, limit: 12 };
-  const places = useSearchTravelPlaces(placesParams, { query: { staleTime: 300000, queryKey: getSearchTravelPlacesQueryKey(placesParams) } });
+  const places = useQuery({ queryKey: ['places', placesParams.city, placesParams.kind], queryFn: () => fetchPlaces(placesParams.city, placesParams.kind), staleTime: 300000 });
   const [submitted, setSubmitted] = useState({ origin: current.origin || 'SFO', destination: current.destination || 'Barcelona', departureDate: current.startDate, returnDate: current.endDate, travelers: current.travelers });
-  const links = useGetTravelSearchLinks(submitted, { query: { staleTime: 300000, queryKey: getGetTravelSearchLinksQueryKey(submitted) } });
+  const links = useQuery({ queryKey: ['links', submitted], queryFn: () => fetchSearchLinks(submitted), staleTime: 300000 });
 
   const accBudget = current.budget.amount * 0.37;
 
@@ -647,7 +731,7 @@ function Stays() {
 
 function Explore() {
   const { current, updateTrip } = useTripStore();
-  const exchange = useGetTravelExchangeRate({ from: 'USD', to: current.budget.currency }, { query: { staleTime: 3600000, queryKey: getGetTravelExchangeRateQueryKey({ from: 'USD', to: current.budget.currency }) } });
+  const exchange = useQuery({ queryKey: ['exchange', current.budget.currency], queryFn: () => fetchExchangeRate('USD', current.budget.currency), staleTime: 3600000 });
   const rate = current.budget.currency === 'USD' ? 1 : exchange.data?.rate ?? 1;
   const [filter, setFilter] = useState('All');
   const visible = filter === 'All' ? activities : activities.filter(a => a.category === filter);
@@ -741,7 +825,7 @@ function Budget() {
   const { current, updateTrip } = useTripStore();
   const nights = calculateNights(current.startDate, current.endDate);
   const rateQuery = { from: 'USD', to: current.budget.currency };
-  const exchange = useGetTravelExchangeRate(rateQuery, { query: { staleTime: 3600000, queryKey: getGetTravelExchangeRateQueryKey(rateQuery) } });
+  const exchange = useQuery({ queryKey: ['exchange', current.budget.currency], queryFn: () => fetchExchangeRate('USD', current.budget.currency), staleTime: 3600000 });
   const rate = current.budget.currency === 'USD' ? 1 : exchange.data?.rate ?? 1;
 
   const alloc = current.budgetAllocation;
